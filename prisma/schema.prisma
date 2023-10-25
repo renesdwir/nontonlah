@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,18 +9,16 @@ datasource db {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  createdBy   User   @relation(fields: [createdById], references: [id])
+  id          Int      @id @default(autoincrement())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
 }
 
-// Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -53,43 +48,41 @@ model Session {
   @@index([userId])
 }
 
-enum EngagementType {
-  LIKE
-  DISLIKE
-  VIEW
-  SAVE
-  FOLLOW
-}
-
 model User {
-  id               String            @id @default(cuid())
-  name             String?
-  email            String?           @unique
-  emailVerified    DateTime?
-  image            String?
-  backgroundImage  String?           @db.Text
-  handle           String?           @unique
-  videos           Video[]
-  accounts         Account[]
-  sessions         Session[]
-  posts            Post[]
-  VideoEngagement VideoEngagement[]
-  Comment       Comment[]
+  id                     String                   @id @default(cuid())
+  name                   String?
+  email                  String?                  @unique
+  emailVerified          DateTime?
+  image                  String?
+  backgroundImage        String?                  @db.Text
+  handle                 String?                  @unique
+  videos                 Video[]
+  accounts               Account[]
+  sessions               Session[]
+  posts                  Post[]
+  VideoEngagement        VideoEngagement[]
+  Comment                Comment[]
+  Announcement           Announcement[]
+  AnnouncementEngagement AnnouncementEngagement[]
+  followers              FollowEngagement[]       @relation("Following")
+  followings             FollowEngagement[]       @relation("Followers")
+  Playlist               Playlist[]
 }
 
 model Video {
-  id               String            @id @default(cuid())
-  title            String?           @db.Text
-  thumbnailUrl     String?           @db.Text
-  description      String?           @db.Text
-  videoUrl         String            @db.Text
-  publish          Boolean           @default(true)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id               String             @id @default(cuid())
+  title            String?            @db.Text
+  thumbnailUrl     String?            @db.Text
+  description      String?            @db.Text
+  videoUrl         String             @db.Text
+  publish          Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   userId           String
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  VideoEngagement VideoEngagement[]
-  Comment       Comment[]
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VideoEngagement  VideoEngagement[]
+  Comment          Comment[]
+  PlaylistHasVideo PlaylistHasVideo[]
 
   @@index([userId])
 }
@@ -100,24 +93,90 @@ model VideoEngagement {
   updatedAt      DateTime       @updatedAt
   engagementType EngagementType
   userId         String?
-  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   videoId        String?
-  video          Video?          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video          Video?         @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([videoId])
 }
 
-model Comment{
-  id             String         @id @default(cuid())
-message String @db.Text
-createdAt      DateTime       @default(now())
+model Comment {
+  id        String   @id @default(cuid())
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([videoId])
+}
+
+model Announcement {
+  id                     String                   @id @default(cuid())
+  message                String                   @db.Text
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  userId                 String
+  user                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  AnnouncementEngagement AnnouncementEngagement[]
+
+  @@index([userId])
+}
+
+model AnnouncementEngagement {
+  engagementType EngagementType
+  createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoId        String
-  video          Video         @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  announcementId String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcement   Announcement   @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, announcementId])
   @@index([userId])
+  @@index([announcementId])
+}
+
+model FollowEngagement {
+  followerId     String
+  followingId    String
+  engagementType EngagementType
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  follower       User           @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following      User           @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Playlist {
+  id               String             @id @default(cuid())
+  title            String             @db.Text
+  description      String             @db.Text
+  userId           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  PlaylistHasVideo PlaylistHasVideo[]
+
+  @@index([userId])
+}
+
+model PlaylistHasVideo {
+  id         String   @id @default(cuid())
+  playlistId String
+  videoId    String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video      Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([playlistId, videoId])
+  @@index([playlistId])
   @@index([videoId])
 }
 
@@ -127,4 +186,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum EngagementType {
+  LIKE
+  DISLIKE
+  VIEW
+  SAVE
+  FOLLOW
 }
