@@ -56,6 +56,7 @@ model User {
   image                  String?
   backgroundImage        String?                  @db.Text
   handle                 String?                  @unique
+  description            String?                  @db.Text
   videos                 Video[]
   accounts               Account[]
   sessions               Session[]
