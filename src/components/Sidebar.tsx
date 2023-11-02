@@ -4,6 +4,7 @@ import {
   ClockRewind,
   Folder,
   Home,
+  Settings,
   ThumbsUp,
   UserCheck,
   VideoRecorder,
@@ -120,7 +121,14 @@ export default function Sidebar({
                   ))}
                 </ul>
               </li>
-              <li className="mt-auto"></li>
+              <li className="mt-auto">
+                <Link href={"#"}>
+                  <Settings className="h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600" />
+                  <p className={classNames(closeSidebar ? "hidden" : "")}>
+                    Settings
+                  </p>
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>
