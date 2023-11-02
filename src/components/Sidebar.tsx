@@ -10,6 +10,7 @@ import {
 } from "./Icons/Icons";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -69,6 +70,11 @@ export default function Sidebar({
       current: router.asPath === `/${String(userId)}/ProfileFollowing`,
     },
   ];
+  useEffect(() => {
+    DesktopNavigation.forEach((nav) => {
+      nav.current = nav.path === router.pathname;
+    });
+  }, [router.pathname]);
   return (
     <>
       <div
