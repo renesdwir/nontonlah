@@ -125,6 +125,10 @@ export default function Sidebar({
                 <Link
                   href={"#"}
                   className="group -mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    sessionData ? void router.push("/Settings") : void signIn();
+                  }}
                 >
                   <Settings className="h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600" />
                   <p className={classNames(closeSidebar ? "hidden" : "")}>
