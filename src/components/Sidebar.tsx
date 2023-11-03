@@ -3,6 +3,7 @@ import { classNames } from "~/utils/helper";
 import {
   ClockRewind,
   Folder,
+  HelpCircle,
   Home,
   Settings,
   ThumbsUp,
@@ -133,6 +134,15 @@ export default function Sidebar({
                   <Settings className="h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600" />
                   <p className={classNames(closeSidebar ? "hidden" : "")}>
                     Settings
+                  </p>
+                </Link>
+                <Link
+                  href={"/Blog/help"}
+                  className="group -mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+                >
+                  <HelpCircle className="h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600" />
+                  <p className={classNames(closeSidebar ? "hidden" : "")}>
+                    Help
                   </p>
                 </Link>
               </li>
