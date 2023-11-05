@@ -7,17 +7,19 @@ import {
   Home,
   Settings,
   ThumbsUp,
+  User,
   UserCheck,
   VideoRecorder,
 } from "./Icons/Icons";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 
 interface SidebarProps {
   isOpen?: boolean;
-  openSidebar?: (open: boolean) => void;
-  closeSidebar?: (open: boolean) => void;
+  setSidebarOpen: (open: boolean) => void;
+  closeSidebar?: boolean;
 }
 interface NavigationItem {
   name: string;
@@ -27,8 +29,8 @@ interface NavigationItem {
 }
 export default function Sidebar({
   isOpen,
+  setSidebarOpen,
   closeSidebar,
-  openSidebar,
 }: SidebarProps) {
   const router = useRouter();
   const { data: sessionData } = useSession();
@@ -72,8 +74,30 @@ export default function Sidebar({
       current: router.asPath === `/${String(userId)}/ProfileFollowing`,
     },
   ];
+  const SignedInMobileNavigation: NavigationItem[] = [
+    {
+      name: "Profile",
+      path: `/${String(userId)}/ProfileVideos`,
+      icon: (className) => <User className={className} />,
+      current: router.pathname === "/Profile",
+    },
+  ];
+  const SignedOutMobileNavigation: NavigationItem[] = [
+    {
+      name: "Help",
+      path: `/Blog/Help`,
+      icon: (className) => <HelpCircle className={className} />,
+      current: router.pathname === "/Blog/Help",
+    },
+  ];
+  const mobileNavigation = sessionData
+    ? SignedInMobileNavigation
+    : SignedOutMobileNavigation;
   useEffect(() => {
     DesktopNavigation.forEach((nav) => {
+      nav.current = nav.path === router.pathname;
+    });
+    mobileNavigation.forEach((nav) => {
       nav.current = nav.path === router.pathname;
     });
   }, [router.pathname]);
@@ -150,6 +174,40 @@ export default function Sidebar({
           </nav>
         </div>
       </div>
+      <Transition.Root show={isOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-50 lg:hidden"
+          onClose={setSidebarOpen}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-linear duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-linear duration-300"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-900/80" />
+          </Transition.Child>
+          <div className="fixed inset-0 flex">
+            <Transition.Child
+              as={Fragment}
+              enter="transition-opacity ease-linear duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity ease-linear duration-300"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+                <p>Hello World</p>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </>
   );
 }
