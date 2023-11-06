@@ -1,10 +1,14 @@
 import { useRouter } from "next/router";
 import { classNames } from "~/utils/helper";
 import {
+  Brush,
   ClockRewind,
+  Close,
   Folder,
   HelpCircle,
   Home,
+  Logo,
+  MessagePlusSquare,
   Settings,
   ThumbsUp,
   User,
@@ -81,6 +85,30 @@ export default function Sidebar({
       icon: (className) => <User className={className} />,
       current: router.pathname === "/Profile",
     },
+    {
+      name: "Creator Studio",
+      path: `/Dashboard`,
+      icon: (className) => <Brush className={className} />,
+      current: router.pathname === "/CreatorStudio",
+    },
+    {
+      name: "Help",
+      path: "/Blog/Help",
+      icon: (className) => <HelpCircle className={className} />,
+      current: router.pathname === "/Blog/Help",
+    },
+    {
+      name: "Settings",
+      path: "/Settings",
+      icon: (className) => <Settings className={className} />,
+      current: router.pathname === "/Settings",
+    },
+    {
+      name: "Feedback",
+      path: `mailto:riwantorenes@gmail.com`,
+      icon: (className) => <MessagePlusSquare className={className} />,
+      current: router.pathname === "/Feedback",
+    },
   ];
   const SignedOutMobileNavigation: NavigationItem[] = [
     {
@@ -88,6 +116,12 @@ export default function Sidebar({
       path: `/Blog/Help`,
       icon: (className) => <HelpCircle className={className} />,
       current: router.pathname === "/Blog/Help",
+    },
+    {
+      name: "Feedback",
+      path: `mailto:riwantorenes@gmail.com`,
+      icon: (className) => <MessagePlusSquare className={className} />,
+      current: router.pathname === "/Feedback",
     },
   ];
   const mobileNavigation = sessionData
@@ -201,8 +235,64 @@ export default function Sidebar({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                <p>Hello World</p>
+              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1 ">
+                <div className="absolute left-full top-0  flex w-16  justify-center  pt-5">
+                  <button
+                    type="button"
+                    className="-m-2.5 p-2.5"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <span className="sr-only">Close Sidebar</span>
+                    <Close className="h-6 w-6" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
+                  <nav className="flex flex-1 flex-col pt-4">
+                    <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                      <Logo className="w-24" />
+                      <li className="border-t">
+                        <ul role="list" className="-mx-2 space-y-1 pt-3">
+                          {mobileNavigation.map((item) => (
+                            <li key={item.name}>
+                              <Link
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (item.path === "sign-in") {
+                                    void signIn();
+                                  } else {
+                                    void router.push(item.path || "/");
+                                  }
+                                }}
+                                className={classNames(
+                                  item.current
+                                    ? " bg-gray-50 text-primary-600"
+                                    : " text-gray-700 hover:bg-gray-50 hover:text-primary-600",
+                                  "group flex gap-x-3 rounded-md px-2 py-1.5 text-sm font-semibold leading-6",
+                                )}
+                              >
+                                {item.current
+                                  ? item.icon(
+                                      "h-5 w-5 shrink-0 stroke-primary-600",
+                                    )
+                                  : item.icon(
+                                      "h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600",
+                                    )}
+                                <p
+                                  className={classNames(
+                                    closeSidebar ? "hidden" : "",
+                                  )}
+                                >
+                                  {item.name}
+                                </p>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
