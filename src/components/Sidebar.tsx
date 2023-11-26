@@ -308,6 +308,15 @@ export default function Sidebar({
                           Terms of Service
                         </Link>
                       </li>
+                      {sessionData ? (
+                        <>
+                          <p>Signed In</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>Signed Out</p>
+                        </>
+                      )}
                     </ul>
                   </nav>
                 </div>
