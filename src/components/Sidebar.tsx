@@ -4,9 +4,11 @@ import {
   Brush,
   ClockRewind,
   Close,
+  File,
   Folder,
   HelpCircle,
   Home,
+  Lock,
   Logo,
   MessagePlusSquare,
   Settings,
@@ -248,7 +250,7 @@ export default function Sidebar({
                 </div>
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
                   <nav className="flex flex-1 flex-col pt-4">
-                    <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                    <ul role="list" className="flex flex-1 flex-col gap-y-7 ">
                       <Logo className="w-24" />
                       <li className="border-t">
                         <ul role="list" className="-mx-2 space-y-1 pt-3">
@@ -289,6 +291,15 @@ export default function Sidebar({
                             </li>
                           ))}
                         </ul>
+                      </li>
+                      <li className="mt-auto border-b ">
+                        <Link
+                          href={"/Blog/privacy"}
+                          className="group -mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+                        >
+                          <Lock className="h-5 w-5 shrink-0 stroke-gray-500 group-hover:stroke-primary-600" />
+                          Privacy
+                        </Link>
                       </li>
                     </ul>
                   </nav>
