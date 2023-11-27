@@ -21,6 +21,7 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { Fragment, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import Button from "./Buttons/Button";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -313,9 +314,21 @@ export default function Sidebar({
                           <p>Signed In</p>
                         </>
                       ) : (
-                        <>
-                          <p>Signed Out</p>
-                        </>
+                        <li className="space-y-2">
+                          <Button
+                            variant="primary"
+                            size="2xl"
+                            className="w-full"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              {
+                                void signIn();
+                              }
+                            }}
+                          >
+                            Sign Up
+                          </Button>
+                        </li>
                       )}
                     </ul>
                   </nav>
