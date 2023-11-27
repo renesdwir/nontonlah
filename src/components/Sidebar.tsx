@@ -326,7 +326,20 @@ export default function Sidebar({
                               }
                             }}
                           >
-                            Sign Up
+                            Sign up
+                          </Button>
+                          <Button
+                            variant="secondary-gray"
+                            size="2xl"
+                            className="w-full"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              {
+                                void signIn();
+                              }
+                            }}
+                          >
+                            Log in
                           </Button>
                         </li>
                       )}
