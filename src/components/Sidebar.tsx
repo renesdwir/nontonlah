@@ -9,6 +9,7 @@ import {
   HelpCircle,
   Home,
   Lock,
+  LogOut,
   Logo,
   MessagePlusSquare,
   Settings,
@@ -22,6 +23,7 @@ import { signIn, useSession } from "next-auth/react";
 import { Fragment, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Button from "./Buttons/Button";
+import { UserImage } from "./VideoComponent";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -310,9 +312,28 @@ export default function Sidebar({
                         </Link>
                       </li>
                       {sessionData ? (
-                        <>
-                          <p>Signed In</p>
-                        </>
+                        <div className="my-2 flex flex-row ">
+                          <div>
+                            <UserImage
+                              image={sessionData?.user.image || "profile.jpg"}
+                            />
+                          </div>
+                          <div className="ml-2 flex w-full flex-col justify-start truncate text-sm">
+                            <p className="font-semibold text-gray-700">
+                              {sessionData && (
+                                <span>{sessionData.user.name}</span>
+                              )}
+                            </p>
+                            <p className="text-gray-600">
+                              {sessionData && (
+                                <span>{sessionData.user.email}</span>
+                              )}
+                            </p>
+                          </div>
+                          <Button variant="tertiary-gray" size="lg">
+                            <LogOut className="w-5 stroke-gray-600" />
+                          </Button>
+                        </div>
                       ) : (
                         <li className="space-y-2">
                           <Button
