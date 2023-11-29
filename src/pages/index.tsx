@@ -1,14 +1,13 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { NextPage } from "next/types";
 import Button from "~/components/Buttons/Button";
 import { Layout, Navbar, Sidebar } from "~/components/Components";
 
 import { api } from "~/utils/api";
 
-export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
-
+const Home: NextPage = () => {
   return (
     <>
       <Head>
@@ -21,8 +20,8 @@ export default function Home() {
       </Layout>
     </>
   );
-}
-
+};
+export default Home;
 function AuthShowcase() {
   const { data: sessionData } = useSession();
 
