@@ -8,6 +8,8 @@ import { Layout, Navbar, Sidebar } from "~/components/Components";
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
+  const { data, isError, isLoading } = api.video.getRandomVideos.useQuery(1);
+  console.log(data, isError, isLoading);
   return (
     <>
       <Head>
@@ -16,7 +18,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <p>This is from the home page</p>
+        <></>
       </Layout>
     </>
   );
