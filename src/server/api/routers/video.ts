@@ -12,31 +12,48 @@ export const videoRouter = createTRPCRouter({
         },
         include: {
           user: true,
+          _count: {
+            select: {
+              VideoEngagement: {
+                where: {
+                  engagementType: EngagementType.VIEW,
+                },
+              },
+            },
+          },
         },
-        take: 10,
       });
       const videos = videoWithUser.map(({ user, ...video }) => video);
       const users = videoWithUser.map(({ user }) => user);
 
-      const videosWithCount = await Promise.all(
-        videos.map(async (video) => {
-          const views = await ctx.db.videoEngagement.count({
-            where: {
-              videoId: video.id,
-              engagementType: EngagementType.VIEW,
-            },
-          });
-          return {
-            ...video,
-            views,
-          };
-        }),
-      );
-      console.log(videosWithCount);
-
-      console.log("testt");
-      return {
-        greeting: `Hello ${input}`,
-      };
+      // const videosWithCount = await Promise.all(
+      //   videos.map(async (video) => {
+      //     const views = await ctx.db.videoEngagement.count({
+      //       where: {
+      //         videoId: video.id,
+      //         engagementType: EngagementType.VIEW,
+      //       },
+      //     });
+      //     return {
+      //       ...video,
+      //       views,
+      //     };
+      //   }),
+      // );
+      const indices = Array.from({ length: videos.length }, (_, i) => i);
+      //shuffle the indices array
+      for (let i = indices.length - 1; i > 0; i--) {
+        if (indices[i] !== undefined) {
+          const j = Math.floor(Math.random() * (i + 1));
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+      }
+      const shuffledVideosWithCounts = indices.map((i) => videos[i]);
+      const shuffledUsers = indices.map((i) => users[i]);
+      const randomVideos = shuffledVideosWithCounts.slice(0, input);
+      const randomUsers = shuffledUsers.slice(0, input);
+      return { videos: randomVideos, users: randomUsers };
     }),
 });
