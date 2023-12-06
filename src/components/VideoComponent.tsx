@@ -54,6 +54,36 @@ export const MultiColumnVideo: React.FC<VideoComponentProps> = ({
     </div>
   );
 };
+export const SingleColumnVideo: React.FC<VideoComponentProps> = ({
+  users,
+  videos,
+}) => {
+  return (
+    <div>
+      {videos.map((video, index) => {
+        const user = users[index];
+        if (!user) return null;
+        return (
+          <Link href={`/video/${video.id}`} key={video.id}>
+            <div className="my-5 flex flex-col gap-4 hover:bg-gray-100 lg:flex-row">
+              <div className="sm:aspect[2/1] relative aspect-[16/9] lg:w-64 lg:shrink-0">
+                <Thumbnail thumbnailUrl={video.thumbnail} />
+              </div>
+              <div>
+                <VideoTitle title={video.title} />
+                <VideoInfo views={video.views} createdAt={video.createdAt} />
+                <div className="relative mt-2 flex flex-row items-center gap-x-4">
+                  <UserImage image={user.image || ""} />
+                  <Username name={user.name || ""} />
+                </div>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+};
 
 export function VideoTitle({
   title,
