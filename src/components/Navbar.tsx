@@ -12,8 +12,8 @@ import {
   Lock,
   LogOut,
 } from "./Icons/Icons";
-import React, { useState } from "react";
-import router from "next/router";
+import React, { useEffect, useRef, useState } from "react";
+import router, { useRouter } from "next/router";
 import { Menu, Transition } from "@headlessui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { UserImage } from "./Components";
@@ -30,10 +30,11 @@ interface NavigationItem {
   lineAbove: boolean;
 }
 export default function Navbar({ children }: NavbarProps) {
-  const [searchInput, setSearchInput] = useState("");
+  const router = useRouter();
+  const searchQuery = router.query.q;
   const { data: sessionData } = useSession();
   const userId = sessionData?.user.id;
-
+  const searchRef = useRef<HTMLInputElement>(null);
   const signedInNavigation: NavigationItem[] = [
     {
       icon: (className) => <User className={className} />,
@@ -114,7 +115,12 @@ export default function Navbar({ children }: NavbarProps) {
 
   const handleSearch = async () => {
     try {
-      await router.push({ pathname: "/SearchPage", query: { q: searchInput } });
+      if (searchRef.current && searchRef.current.value) {
+        await router.push({
+          pathname: "/SearchPage",
+          query: { q: searchRef.current.value },
+        });
+      }
     } catch (error) {
       console.error("Error navigating to search page:", error);
     }
@@ -143,14 +149,13 @@ export default function Navbar({ children }: NavbarProps) {
                     <Search className="h-5 w-5  stroke-gray-400" />
                   </div>
                   <input
+                    ref={searchRef}
                     type="search"
                     id="search"
                     name="search"
                     className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-500 sm:text-sm sm:leading-6 "
                     placeholder="Search"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      setSearchInput(e.target.value);
-                    }}
+                    defaultValue={searchQuery}
                     onKeyDown={handleKeyDown}
                   />
                 </div>
