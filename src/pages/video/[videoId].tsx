@@ -2,7 +2,10 @@ import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import ReactPlayer from "react-player";
+import ErrorMessage from "~/components/ErrorMessage";
 import Layout from "~/components/Layout";
+import LoadingMessage from "~/components/LoadingMessage";
 import { api } from "~/utils/api";
 
 const VideoPage: NextPage = () => {
@@ -20,6 +23,20 @@ const VideoPage: NextPage = () => {
   const video = data?.video;
   const user = data?.user;
   const errorTypes = error || !video || !user;
+  const DataError = () => {
+    if (isLoading) {
+      return <LoadingMessage />;
+    } else if (errorTypes) {
+      return (
+        <ErrorMessage
+          message="No Video"
+          description="Sorry there is an error loading video."
+        />
+      );
+    } else {
+      return <></>;
+    }
+  };
   return (
     <>
       <Head>
@@ -28,7 +45,26 @@ const VideoPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout closeSidebar={true}>
-        <p>Hello World</p>
+        <main className="lg-flex mx-auto">
+          {errorTypes ? (
+            <DataError />
+          ) : (
+            <>
+              <div className="w-full sm:px-4 lg:w-3/5">
+                <div className="py-4">
+                  <ReactPlayer
+                    controls={true}
+                    style={{ borderRadius: "1rem", overflow: "hidden" }}
+                    width={"100%"}
+                    height={"50%"}
+                    url={video.videoUrl || ""}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          <div className="px-4 lg:w-2/5 lg:px-0"></div>
+        </main>
       </Layout>
     </>
   );
