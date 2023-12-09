@@ -85,6 +85,37 @@ export const SingleColumnVideo: React.FC<VideoComponentProps> = ({
   );
 };
 
+export const SmallSingleColumnVideo: React.FC<VideoComponentProps> = ({
+  users,
+  videos,
+  refetch,
+}) => (
+  <div>
+    {videos.map((video, index) => {
+      const user = users[index];
+      if (!user) return null;
+      return (
+        <Link href={`/video/${video.id}`} key={video.id} onClick={refetch}>
+          <div className="relative isolate my-4 flex flex-col gap-4 rounded-2xl border hover:bg-gray-100 lg:flex-row">
+            <div className="aspect[16/9] sm:aspect-[2/1] lg:w-52 lg:shrink-0">
+              <Thumbnail thumbnailUrl={video.thumbnail} />
+            </div>
+            <div className="mt-2 flex w-full flex-col items-start overflow-hidden text-xs max-lg:mx-2">
+              <VideoTitle
+                title={video.title}
+                limitHeight={true}
+                limitSize={true}
+              />
+              <VideoInfo views={video.views} createdAt={video.createdAt} />
+              <Username name={user.name || ""} />
+            </div>
+          </div>
+        </Link>
+      );
+    })}
+  </div>
+);
+
 export function VideoTitle({
   title,
   limitHeight,
