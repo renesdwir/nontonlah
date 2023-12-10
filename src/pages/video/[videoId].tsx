@@ -20,7 +20,10 @@ const VideoPage: NextPage = () => {
       id: videoId as string,
       viewerId: sessionData?.user?.id as string,
     },
-    { enabled: !!videoId && !!sessionData?.user?.id },
+    {
+      enabled: !!videoId && !!sessionData?.user?.id,
+      refetchOnWindowFocus: false,
+    },
   );
   const {
     data: sidebarVideos,
@@ -31,10 +34,43 @@ const VideoPage: NextPage = () => {
     enabled: false,
   });
 
-  useEffect(() => {
-    if (!sidebarVideos) {
-      void refetchSidebarVideos();
+  const addViewMutation = api.videoEngagement.addViewCount.useMutation();
+  const addView = (input: { id: string; userId: string }) => {
+    console.log("333333333333333", sessionData?.user, input);
+    if (input.id) {
+      addViewMutation.mutate(input);
     }
+  };
+  console.log("2222222222222222", sessionData);
+  // useEffect(() => {
+  //   if (videoId) void refetch();
+  //   if (sessionData) {
+  //     console.log(sessionData, "11111111");
+  //     addView({
+  //       id: videoId as string,
+  //       userId: sessionData ? sessionData.user.id : "",
+  //     });
+  //   }
+  // }, [videoId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (videoId) {
+        await refetch();
+      }
+
+      if (sessionData) {
+        console.log(sessionData, "11111111");
+        addView({
+          id: videoId as string,
+          userId: sessionData ? sessionData.user.id : "",
+        });
+      }
+    };
+
+    fetchData();
+  }, [videoId, sessionData]);
+  useEffect(() => {
+    if (!sidebarVideos) void refetchSidebarVideos();
   }, []);
 
   const video = data?.video;
@@ -58,7 +94,7 @@ const VideoPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{video?.title}</title>
+        <title>{video?.title || "Nontonlah"}</title>
         <meta name="description" content={user?.description || ""} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -99,6 +135,7 @@ const VideoPage: NextPage = () => {
               <DataError />
             ) : (
               <SmallSingleColumnVideo
+                refetch={refetchSidebarVideos}
                 videos={sidebarVideos.videos.map((video) => ({
                   id: video?.id || "",
                   title: video?.title || "",
