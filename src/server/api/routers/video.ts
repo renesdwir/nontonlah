@@ -37,10 +37,25 @@ export const videoRouter = createTRPCRouter({
         user,
         Comment,
       }));
+      let viewerHasFollowed = false;
+      if (input.viewerId && input.viewerId !== "") {
+        viewerHasFollowed = !!(await ctx.db.followEngagement.findFirst({
+          where: {
+            followingId: rawVideo.userId,
+            followerId: input.viewerId,
+          },
+        }));
+      } else {
+        viewerHasFollowed = false;
+      }
+      const viewer = {
+        hasFollowed: viewerHasFollowed,
+      };
       return {
         video: videoWithLikesDislikesViews,
         user: userWithFollowers,
         comments: commenstWithUser,
+        viewer,
       };
     }),
   getRandomVideos: publicProcedure
