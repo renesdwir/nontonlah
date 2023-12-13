@@ -20,7 +20,7 @@ export const videoRouter = createTRPCRouter({
       }
       const { user, Comment, ...video } = rawVideo;
       const followers = await ctx.db.followEngagement.count({
-        where: { followerId: video.userId },
+        where: { followingId: video.userId },
       });
       const likes = await ctx.db.videoEngagement.count({
         where: { videoId: video.id, engagementType: EngagementType.LIKE },
@@ -38,6 +38,8 @@ export const videoRouter = createTRPCRouter({
         Comment,
       }));
       let viewerHasFollowed = false;
+      let viewerHasLiked = false;
+      let viewerHasDisliked = false;
       if (input.viewerId && input.viewerId !== "") {
         viewerHasFollowed = !!(await ctx.db.followEngagement.findFirst({
           where: {
@@ -45,11 +47,29 @@ export const videoRouter = createTRPCRouter({
             followerId: input.viewerId,
           },
         }));
+        viewerHasLiked = !!(await ctx.db.videoEngagement.findFirst({
+          where: {
+            videoId: input.id,
+            userId: input.viewerId,
+            engagementType: EngagementType.LIKE,
+          },
+        }));
+        viewerHasDisliked = !!(await ctx.db.videoEngagement.findFirst({
+          where: {
+            videoId: input.id,
+            userId: input.viewerId,
+            engagementType: EngagementType.DISLIKE,
+          },
+        }));
       } else {
         viewerHasFollowed = false;
+        viewerHasLiked = false;
+        viewerHasDisliked = false;
       }
       const viewer = {
         hasFollowed: viewerHasFollowed,
+        hasLiked: viewerHasLiked,
+        hasDisliked: viewerHasDisliked,
       };
       return {
         video: videoWithLikesDislikesViews,
