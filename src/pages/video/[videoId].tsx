@@ -1,14 +1,21 @@
 import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import ReactPlayer from "react-player";
+import FollowButton from "~/components/Buttons/FollowButton";
 import { SmallSingleColumnVideo } from "~/components/Components";
 import ErrorMessage from "~/components/ErrorMessage";
 import Layout from "~/components/Layout";
 import LoadingMessage from "~/components/LoadingMessage";
-import { VideoInfo, VideoTitle } from "~/components/VideoComponent";
+import {
+  UserImage,
+  Username,
+  VideoInfo,
+  VideoTitle,
+} from "~/components/VideoComponent";
 import { api } from "~/utils/api";
 
 const VideoPage: NextPage = () => {
@@ -36,46 +43,28 @@ const VideoPage: NextPage = () => {
 
   const addViewMutation = api.videoEngagement.addViewCount.useMutation();
   const addView = (input: { id: string; userId: string }) => {
-    console.log("333333333333333", sessionData?.user, input);
     if (input.id) {
       addViewMutation.mutate(input);
     }
   };
-  console.log("2222222222222222", sessionData);
-  // useEffect(() => {
-  //   if (videoId) void refetch();
-  //   if (sessionData) {
-  //     console.log(sessionData, "11111111");
-  //     addView({
-  //       id: videoId as string,
-  //       userId: sessionData ? sessionData.user.id : "",
-  //     });
-  //   }
-  // }, [videoId]);
   useEffect(() => {
-    const fetchData = async () => {
-      if (videoId) {
-        await refetch();
-      }
+    if (videoId) {
+      addView({
+        id: videoId as string,
+        userId: sessionData ? sessionData.user.id : "",
+      });
+      void refetch();
+    }
+  }, [videoId]);
 
-      if (sessionData) {
-        console.log(sessionData, "11111111");
-        addView({
-          id: videoId as string,
-          userId: sessionData ? sessionData.user.id : "",
-        });
-      }
-    };
-
-    fetchData();
-  }, [videoId, sessionData]);
   useEffect(() => {
     if (!sidebarVideos) void refetchSidebarVideos();
   }, []);
 
   const video = data?.video;
   const user = data?.user;
-  const errorTypes = error || !video || !user;
+  const viewer = data?.viewer;
+  const errorTypes = error || !video || !user || !viewer;
   const DataError = () => {
     if (isLoading) {
       return <LoadingMessage />;
@@ -112,6 +101,7 @@ const VideoPage: NextPage = () => {
                     width={"100%"}
                     height={"50%"}
                     url={video.videoUrl || ""}
+                    onPlay={() => console.log("playy")}
                   />
                 </div>
                 <div className="flex space-x-3 rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -124,6 +114,27 @@ const VideoPage: NextPage = () => {
                           createdAt={video.createdAt}
                         />
                       </div>
+                    </div>
+                    <div className="flex flex-row place-content-between gap-x-4">
+                      <Link
+                        href={`/${video.userId}/ProfileVideos`}
+                        key={video.userId}
+                      >
+                        <div className="flex flex-row gap-2">
+                          <UserImage image={user.image || ""} />
+                          <button className="flex flex-col">
+                            <Username name={user.name || ""} />
+                            <p className=" text-sm text-gray-600">
+                              {user.followers}
+                              <span> Followers</span>
+                            </p>
+                          </button>
+                        </div>
+                      </Link>
+                      <FollowButton
+                        followingId={user.id}
+                        viewer={{ hasFollowed: viewer?.hasFollowed }}
+                      />
                     </div>
                   </div>
                 </div>
