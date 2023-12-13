@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { EngagementType, PrismaClient, Session } from "@prisma/client";
 
 type Context = {
@@ -34,6 +34,22 @@ async function createEngagement(
     data: { videoId: id, userId, engagementType: type },
   });
 }
+async function deleteEngagementIfExists(
+  ctx: Context,
+  id: string,
+  userId: string,
+  type: EngagementType,
+) {
+  const existingEngagement = await ctx.db.videoEngagement.findMany({
+    where: { videoId: id, userId, engagementType: type },
+  });
+
+  if (existingEngagement.length > 0) {
+    await ctx.db.videoEngagement.deleteMany({
+      where: { videoId: id, userId, engagementType: type },
+    });
+  }
+}
 
 export const videoEngagementRouter = createTRPCRouter({
   addViewCount: publicProcedure
@@ -58,5 +74,16 @@ export const videoEngagementRouter = createTRPCRouter({
         EngagementType.VIEW,
       );
       return view;
+    }),
+
+  addLike: protectedProcedure
+    .input(z.object({ id: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await deleteEngagementIfExists(
+        ctx,
+        input.id,
+        input.userId,
+        EngagementType.DISLIKE,
+      );
     }),
 });
