@@ -85,5 +85,27 @@ export const videoEngagementRouter = createTRPCRouter({
         input.userId,
         EngagementType.DISLIKE,
       );
+      const existingLike = await ctx.db.videoEngagement.findMany({
+        where: {
+          videoId: input.id,
+          userId: input.userId,
+          engagementType: EngagementType.LIKE,
+        },
+      });
+      if (existingLike.length > 0) {
+        return await deleteEngagementIfExists(
+          ctx,
+          input.id,
+          input.userId,
+          EngagementType.LIKE,
+        );
+      } else {
+        return await createEngagement(
+          ctx,
+          input.id,
+          input.userId,
+          EngagementType.LIKE,
+        );
+      }
     }),
 });
