@@ -92,7 +92,19 @@ export const videoEngagementRouter = createTRPCRouter({
           engagementType: EngagementType.LIKE,
         },
       });
+      const playlist = await getOrCreatePlaylist(
+        ctx,
+        "Liked Videos",
+        input.userId,
+        "Liked Videos",
+      );
       if (existingLike.length > 0) {
+        await ctx.db.playlistHasVideo.deleteMany({
+          where: {
+            playlistId: playlist.id,
+            videoId: input.id,
+          },
+        });
         return await deleteEngagementIfExists(
           ctx,
           input.id,
@@ -100,6 +112,9 @@ export const videoEngagementRouter = createTRPCRouter({
           EngagementType.LIKE,
         );
       } else {
+        await ctx.db.playlistHasVideo.create({
+          data: { playlistId: playlist.id, videoId: input.id },
+        });
         return await createEngagement(
           ctx,
           input.id,
