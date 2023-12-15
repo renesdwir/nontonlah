@@ -123,4 +123,51 @@ export const videoEngagementRouter = createTRPCRouter({
         );
       }
     }),
+  addDislike: protectedProcedure
+    .input(z.object({ id: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await deleteEngagementIfExists(
+        ctx,
+        input.id,
+        input.userId,
+        EngagementType.LIKE,
+      );
+      const existingDislike = await ctx.db.videoEngagement.findMany({
+        where: {
+          videoId: input.id,
+          userId: input.userId,
+          engagementType: EngagementType.DISLIKE,
+        },
+      });
+      const playlist = await getOrCreatePlaylist(
+        ctx,
+        "Disliked Videos",
+        input.userId,
+        "Disliked Videos",
+      );
+      if (existingDislike.length > 0) {
+        await ctx.db.playlistHasVideo.deleteMany({
+          where: {
+            playlistId: playlist.id,
+            videoId: input.id,
+          },
+        });
+        return await deleteEngagementIfExists(
+          ctx,
+          input.id,
+          input.userId,
+          EngagementType.DISLIKE,
+        );
+      } else {
+        await ctx.db.playlistHasVideo.create({
+          data: { playlistId: playlist.id, videoId: input.id },
+        });
+        return await createEngagement(
+          ctx,
+          input.id,
+          input.userId,
+          EngagementType.DISLIKE,
+        );
+      }
+    }),
 });
