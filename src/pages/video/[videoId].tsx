@@ -17,18 +17,27 @@ import {
   VideoTitle,
 } from "~/components/VideoComponent";
 import { api } from "~/utils/api";
+import { type GetServerSideProps } from "next";
+import { getServerAuthSession } from "~/server/auth";
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getServerAuthSession(ctx);
+  return {
+    props: { session },
+  };
+};
 
 const VideoPage: NextPage = () => {
+  const { data: sessionData } = useSession();
   const router = useRouter();
   const { videoId } = router.query;
-  const { data: sessionData } = useSession();
   const { data, isLoading, error, refetch } = api.video.getVideoById.useQuery(
     {
       id: videoId as string,
       viewerId: sessionData?.user?.id as string,
     },
     {
-      enabled: !!videoId && !!sessionData?.user?.id,
+      enabled: false,
       refetchOnWindowFocus: false,
     },
   );
@@ -40,11 +49,15 @@ const VideoPage: NextPage = () => {
   } = api.video.getRandomVideos.useQuery(20, {
     enabled: false,
   });
-
   const addViewMutation = api.videoEngagement.addViewCount.useMutation();
   const addView = (input: { id: string; userId: string }) => {
     if (input.id) {
-      addViewMutation.mutate(input);
+      addViewMutation.mutate(input, {
+        onSuccess: () => {
+          refetch();
+          if (!sidebarVideos) void refetchSidebarVideos();
+        },
+      });
     }
   };
   useEffect(() => {
@@ -53,13 +66,8 @@ const VideoPage: NextPage = () => {
         id: videoId as string,
         userId: sessionData ? sessionData.user.id : "",
       });
-      void refetch();
     }
   }, [videoId]);
-
-  useEffect(() => {
-    if (!sidebarVideos) void refetchSidebarVideos();
-  }, []);
 
   const video = data?.video;
   const user = data?.user;
