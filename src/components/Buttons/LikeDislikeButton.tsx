@@ -1,3 +1,5 @@
+import React from "react";
+
 interface LikeDislikeButtonProps {
   EngagementData: {
     id: string;
@@ -8,4 +10,15 @@ interface LikeDislikeButtonProps {
     hasLiked: boolean;
     hasDisliked: boolean;
   };
+}
+
+export default function LikeDislikeButton({
+  EngagementData,
+  viewer,
+}: LikeDislikeButtonProps) {
+  return (
+    <>
+      <p>Like Dislike</p>
+    </>
+  );
 }
