@@ -18,6 +18,7 @@ export { default as UserCheck } from "./UserCheck";
 export { default as Menu } from "./Menu";
 export { default as Close } from "./Close";
 export { default as UserPlus } from "./UserPlus";
+export { default as ThumbsDown } from "./ThumbsDown";
 export {
   GreenPlay,
   GreenHorn,
