@@ -19,6 +19,7 @@ import {
 import { api } from "~/utils/api";
 import { type GetServerSideProps } from "next";
 import { getServerAuthSession } from "~/server/auth";
+import { LikeDislikeButton } from "~/components/Buttons/Buttons";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
@@ -120,6 +121,19 @@ const VideoPage: NextPage = () => {
                         <VideoInfo
                           views={video.views}
                           createdAt={video.createdAt}
+                        />
+                      </div>
+                      <div className="flex-inline flex items-end justify-start  gap-4 self-start  ">
+                        <LikeDislikeButton
+                          EngagementData={{
+                            id: video.id,
+                            likes: video.likes,
+                            dislikes: video.dislikes,
+                          }}
+                          viewer={{
+                            hasDisliked: viewer.hasDisliked,
+                            hasLiked: viewer.hasLiked,
+                          }}
                         />
                       </div>
                     </div>
