@@ -27,3 +27,4 @@ export {
   GreenHeart,
   GreenUserCheck,
 } from "./GreenIcons";
+export { ChevronDown, ChevronUp } from "./Chevron";
