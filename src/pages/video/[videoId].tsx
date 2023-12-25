@@ -6,7 +6,11 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import ReactPlayer from "react-player";
 import FollowButton from "~/components/Buttons/FollowButton";
-import { SmallSingleColumnVideo } from "~/components/Components";
+import {
+  CommentSection,
+  Description,
+  SmallSingleColumnVideo,
+} from "~/components/Components";
 import ErrorMessage from "~/components/ErrorMessage";
 import Layout from "~/components/Layout";
 import LoadingMessage from "~/components/LoadingMessage";
@@ -158,8 +162,30 @@ const VideoPage: NextPage = () => {
                         viewer={{ hasFollowed: viewer?.hasFollowed }}
                       />
                     </div>
+                    <Description
+                      text={video.description || ""}
+                      length={200}
+                      border={true}
+                    />
                   </div>
                 </div>
+                <CommentSection
+                  videoId={video.id}
+                  comments={data.comments.map(({ user, Comment }) => ({
+                    comment: {
+                      id: Comment.id,
+                      message: Comment.message,
+                      createdAt: Comment.createdAt,
+                    },
+                    user: {
+                      id: user.id,
+                      name: user.name,
+                      image: user.image,
+                      handle: user.handle,
+                    },
+                  }))}
+                  refetch={refetch}
+                />
               </div>
             </>
           )}
