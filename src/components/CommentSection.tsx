@@ -115,7 +115,7 @@ export default function CommentSection({
                             {moment(comment.createdAt).fromNow()}
                           </p>
                         </div>
-                        <p className="text-red-600">{user.handle}</p>
+                        <p className="text-gray-600">{user.handle}</p>
                       </div>
                       <p className="my-2 text-gray-600">{comment.message}</p>
                     </div>
