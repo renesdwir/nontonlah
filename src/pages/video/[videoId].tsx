@@ -23,7 +23,7 @@ import {
 import { api } from "~/utils/api";
 import { type GetServerSideProps } from "next";
 import { getServerAuthSession } from "~/server/auth";
-import { LikeDislikeButton } from "~/components/Buttons/Buttons";
+import { LikeDislikeButton, SaveButton } from "~/components/Buttons/Buttons";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
@@ -139,6 +139,7 @@ const VideoPage: NextPage = () => {
                             hasLiked: viewer.hasLiked,
                           }}
                         />
+                        <SaveButton videoId={video.id} />
                       </div>
                     </div>
                     <div className="flex flex-row place-content-between gap-x-4">
