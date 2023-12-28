@@ -1,12 +1,49 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Close, FolderPlus } from "../Icons/Icons";
 import Button from "./Button";
 import { signIn, useSession } from "next-auth/react";
 import { Dialog, Transition } from "@headlessui/react";
+import { api } from "~/utils/api";
 
 export default function SaveButton({ videoId }: { videoId: string }) {
   const { data: sessionData } = useSession();
   const [open, setOpen] = useState(false);
+  const [checkedStatus, setCheckedStatus] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const { data: playlists, refetch: refetchPlaylists } =
+    api.playlist.getSavePlaylistData.useQuery(sessionData?.user?.id as string, {
+      enabled: false,
+    });
+
+  useEffect(() => {
+    if (open && videoId) {
+      void refetchPlaylists();
+      const initialCheckedStatus: { [key: string]: boolean } = {};
+      playlists?.forEach((playlist) => {
+        initialCheckedStatus[playlist.id] = playlist.PlaylistHasVideo.some(
+          (videoItem) => videoItem.videoId === videoId,
+        );
+      });
+
+      setCheckedStatus(initialCheckedStatus);
+    }
+  }, [open]);
+
+  const addVideoToPlaylistMutation = api.video.addVideoToPlaylist.useMutation();
+  const handleCheckmarkToggle = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    input: {
+      playlistId: string;
+      videoId: string;
+    },
+  ) => {
+    addVideoToPlaylistMutation.mutate(input);
+    setCheckedStatus({
+      ...checkedStatus,
+      [input.playlistId]: event.target.checked,
+    });
+  };
   return (
     <>
       <Button
@@ -61,6 +98,39 @@ export default function SaveButton({ videoId }: { videoId: string }) {
                       Save Video To Playlist
                     </Dialog.Title>
                   </div>
+                  <fieldset className="w-full">
+                    {playlists?.map((playlist) => (
+                      <div key={playlist.id} className=" space-y-5  py-1 ">
+                        <div className="relative flex items-start justify-start text-left">
+                          <div className="flex h-6 items-center">
+                            <input
+                              id="comments"
+                              aria-describedby="comments-description"
+                              name="comments"
+                              type="checkbox"
+                              checked={checkedStatus[playlist.id] || false}
+                              onChange={(event) =>
+                                handleCheckmarkToggle(event, {
+                                  videoId: videoId,
+                                  playlistId: playlist.id,
+                                })
+                              }
+                              className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
+                            />
+                          </div>
+
+                          <div className="ml-3 text-sm leading-6">
+                            <label
+                              htmlFor="comments"
+                              className="font-medium text-gray-900"
+                            >
+                              {playlist.title}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </fieldset>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
