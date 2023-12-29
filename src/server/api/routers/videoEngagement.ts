@@ -14,7 +14,6 @@ async function getOrCreatePlaylist(
   let playlist = await ctx.db.playlist.findFirst({
     where: { title, userId },
   });
-
   if (playlist === null || playlist === undefined) {
     playlist = await ctx.db.playlist.create({
       data: { title, userId, description },
@@ -43,7 +42,6 @@ async function deleteEngagementIfExists(
   const existingEngagement = await ctx.db.videoEngagement.findMany({
     where: { videoId: id, userId, engagementType: type },
   });
-
   if (existingEngagement.length > 0) {
     await ctx.db.videoEngagement.deleteMany({
       where: { videoId: id, userId, engagementType: type },
@@ -92,16 +90,23 @@ export const videoEngagementRouter = createTRPCRouter({
           engagementType: EngagementType.LIKE,
         },
       });
-      const playlist = await getOrCreatePlaylist(
+      const playlistDislike = await getOrCreatePlaylist(
+        ctx,
+        "Disliked Videos",
+        input.userId,
+        "Disliked Videos",
+      );
+      const playlistLike = await getOrCreatePlaylist(
         ctx,
         "Liked Videos",
         input.userId,
         "Liked Videos",
       );
       if (existingLike.length > 0) {
+        // unliked ga ada sangkut pautnya sama dislike
         await ctx.db.playlistHasVideo.deleteMany({
           where: {
-            playlistId: playlist.id,
+            playlistId: playlistLike.id,
             videoId: input.id,
           },
         });
@@ -112,9 +117,27 @@ export const videoEngagementRouter = createTRPCRouter({
           EngagementType.LIKE,
         );
       } else {
-        await ctx.db.playlistHasVideo.create({
-          data: { playlistId: playlist.id, videoId: input.id },
+        //liked
+        await ctx.db.playlistHasVideo.deleteMany({
+          where: {
+            playlistId: playlistDislike.id,
+            videoId: input.id,
+          },
         });
+        const existingPlaylistHasVideo = await ctx.db.playlistHasVideo.findMany(
+          {
+            where: {
+              playlistId: playlistLike.id,
+              videoId: input.id,
+            },
+          },
+        );
+        if (existingPlaylistHasVideo.length <= 0) {
+          await ctx.db.playlistHasVideo.create({
+            data: { playlistId: playlistLike.id, videoId: input.id },
+          });
+        }
+
         return await createEngagement(
           ctx,
           input.id,
@@ -133,22 +156,31 @@ export const videoEngagementRouter = createTRPCRouter({
         EngagementType.LIKE,
       );
       const existingDislike = await ctx.db.videoEngagement.findMany({
+        // kalo ada berarti undisliked, kalo ga ada berarti disliked
         where: {
           videoId: input.id,
           userId: input.userId,
           engagementType: EngagementType.DISLIKE,
         },
       });
-      const playlist = await getOrCreatePlaylist(
+      const playlistDislike = await getOrCreatePlaylist(
         ctx,
         "Disliked Videos",
         input.userId,
         "Disliked Videos",
       );
+      const playlistLike = await getOrCreatePlaylist(
+        ctx,
+        "Liked Videos",
+        input.userId,
+        "Liked Videos",
+      );
+
       if (existingDislike.length > 0) {
+        // undisliked ga ada sangkut pautnya sama liked
         await ctx.db.playlistHasVideo.deleteMany({
           where: {
-            playlistId: playlist.id,
+            playlistId: playlistDislike.id,
             videoId: input.id,
           },
         });
@@ -159,9 +191,27 @@ export const videoEngagementRouter = createTRPCRouter({
           EngagementType.DISLIKE,
         );
       } else {
-        await ctx.db.playlistHasVideo.create({
-          data: { playlistId: playlist.id, videoId: input.id },
+        //disliked
+        await ctx.db.playlistHasVideo.deleteMany({
+          where: {
+            playlistId: playlistLike.id,
+            videoId: input.id,
+          },
         });
+        const existingPlaylistHasVideo = await ctx.db.playlistHasVideo.findMany(
+          {
+            where: {
+              playlistId: playlistDislike.id,
+              videoId: input.id,
+            },
+          },
+        );
+        if (existingPlaylistHasVideo.length <= 0) {
+          await ctx.db.playlistHasVideo.create({
+            data: { playlistId: playlistDislike.id, videoId: input.id },
+          });
+        }
+
         return await createEngagement(
           ctx,
           input.id,
