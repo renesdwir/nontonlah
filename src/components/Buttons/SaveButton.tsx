@@ -14,19 +14,20 @@ export default function SaveButton({ videoId }: { videoId: string }) {
   const { data: playlists, refetch: refetchPlaylists } =
     api.playlist.getSavePlaylistData.useQuery(sessionData?.user?.id as string, {
       enabled: false,
+      onSuccess: (data) => {
+        const initialCheckedStatus: { [key: string]: boolean } = {};
+        data?.forEach((playlist) => {
+          initialCheckedStatus[playlist.id] = playlist.PlaylistHasVideo.some(
+            (videoItem) => videoItem.videoId === videoId,
+          );
+        });
+        setCheckedStatus(initialCheckedStatus);
+      },
     });
 
   useEffect(() => {
     if (open && videoId) {
       void refetchPlaylists();
-      const initialCheckedStatus: { [key: string]: boolean } = {};
-      playlists?.forEach((playlist) => {
-        initialCheckedStatus[playlist.id] = playlist.PlaylistHasVideo.some(
-          (videoItem) => videoItem.videoId === videoId,
-        );
-      });
-
-      setCheckedStatus(initialCheckedStatus);
     }
   }, [open]);
 
@@ -43,6 +44,24 @@ export default function SaveButton({ videoId }: { videoId: string }) {
       ...checkedStatus,
       [input.playlistId]: event.target.checked,
     });
+  };
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const createPlaylistMutation = api.playlist.addPlaylist.useMutation();
+  const handleCreatePlaylist = () => {
+    if (newPlaylistName) {
+      createPlaylistMutation.mutate(
+        {
+          title: newPlaylistName,
+          userId: sessionData?.user.id as string,
+        },
+        {
+          onSuccess: () => {
+            void refetchPlaylists();
+            setNewPlaylistName("");
+          },
+        },
+      );
+    }
   };
   return (
     <>
@@ -83,7 +102,7 @@ export default function SaveButton({ videoId }: { videoId: string }) {
                   <div className="absolute right-0 top-0  hidden pr-4 pt-4 sm:block">
                     <button
                       type="button"
-                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 "
                       onClick={() => setOpen(false)}
                     >
                       <span className="sr-only">Close</span>
@@ -104,7 +123,7 @@ export default function SaveButton({ videoId }: { videoId: string }) {
                         <div className="relative flex items-start justify-start text-left">
                           <div className="flex h-6 items-center">
                             <input
-                              id="comments"
+                              id={playlist.id}
                               aria-describedby="comments-description"
                               name="comments"
                               type="checkbox"
@@ -121,7 +140,7 @@ export default function SaveButton({ videoId }: { videoId: string }) {
 
                           <div className="ml-3 text-sm leading-6">
                             <label
-                              htmlFor="comments"
+                              htmlFor={playlist.id}
                               className="font-medium text-gray-900"
                             >
                               {playlist.title}
@@ -131,6 +150,40 @@ export default function SaveButton({ videoId }: { videoId: string }) {
                       </div>
                     ))}
                   </fieldset>
+                  <div className="mt-5 flex w-full flex-col gap-2 text-left">
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                      >
+                        Name
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="text"
+                          id="text"
+                          value={newPlaylistName}
+                          onChange={(event) => {
+                            setNewPlaylistName(event.target.value);
+                          }}
+                          onKeyUp={(event) => {
+                            if (event.key === "Enter") handleCreatePlaylist();
+                          }}
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6"
+                          placeholder="  Enter Playlist Name "
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      variant="primary"
+                      onClick={handleCreatePlaylist}
+                      className="p-2"
+                      size="xl"
+                    >
+                      Create New Playlist
+                    </Button>
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
