@@ -11,4 +11,5 @@ export { default as LoadingMessage } from "./LoadingMessage";
 export { default as ErrorMessage } from "./ErrorMessage";
 export { default as Description } from "./Description";
 export { default as CommentSection } from "./CommentSection";
+export { default as ProfileHeader } from "./ProfileHeader";
 export { Thumbnail } from "./Thumbnail";

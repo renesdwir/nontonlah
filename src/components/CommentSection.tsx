@@ -30,7 +30,6 @@ export default function CommentSection({
   comments,
   refetch,
 }: CommentSectionProps) {
-  console.log(comments);
   const commentInput = useRef<HTMLTextAreaElement>(null);
   const { data: sessionData } = useSession();
   const addCommentMutation = api.comment.addComment.useMutation();

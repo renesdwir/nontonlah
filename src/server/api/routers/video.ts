@@ -78,6 +78,38 @@ export const videoRouter = createTRPCRouter({
         viewer,
       };
     }),
+  getVideosByUserId: publicProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const videosWithUser = await ctx.db.video.findMany({
+        where: {
+          userId: input,
+          publish: true,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      const videos = videosWithUser.map(({ user, ...video }) => video);
+      const users = videosWithUser.map(({ user }) => user);
+      const videosWithCounts = await Promise.all(
+        videos.map(async (video) => {
+          const views = await ctx.db.videoEngagement.count({
+            where: {
+              videoId: video.id,
+              engagementType: EngagementType.VIEW,
+            },
+          });
+          return {
+            ...video,
+            views,
+          };
+        }),
+      );
+
+      return { videos: videosWithCounts, users: users };
+    }),
   getRandomVideos: publicProcedure
     .input(z.number())
     .query(async ({ ctx, input }) => {
@@ -161,7 +193,6 @@ export const videoRouter = createTRPCRouter({
       if (videos.length === 0) return null;
       return { videos: videos, users: users };
     }),
-
   addVideoToPlaylist: protectedProcedure
     .input(
       z.object({
@@ -169,7 +200,6 @@ export const videoRouter = createTRPCRouter({
         videoId: z.string(),
       }),
     )
-
     .mutation(async ({ ctx, input }) => {
       const playlistAlreadyHasVideo = await ctx.db.playlistHasVideo.findMany({
         where: {
