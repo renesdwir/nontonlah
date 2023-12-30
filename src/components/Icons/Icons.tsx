@@ -20,6 +20,8 @@ export { default as Close } from "./Close";
 export { default as UserPlus } from "./UserPlus";
 export { default as ThumbsDown } from "./ThumbsDown";
 export { default as FolderPlus } from "./FolderPlus";
+export { default as Edit } from "./Edit";
+export { default as Plus } from "./Plus";
 export {
   GreenPlay,
   GreenHorn,
