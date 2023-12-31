@@ -8,6 +8,54 @@ import {
 } from "~/server/api/trpc";
 
 export const playlistRouter = createTRPCRouter({
+  getPlaylistsByUserId: publicProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const rawPlaylists = await ctx.db.playlist.findMany({
+        where: {
+          userId: input,
+        },
+        include: {
+          user: true,
+          PlaylistHasVideo: {
+            include: {
+              video: true,
+            },
+          },
+        },
+      });
+
+      const playlists = await Promise.all(
+        rawPlaylists.map(async (playlist) => {
+          const videoCount = await ctx.db.playlistHasVideo.count({
+            where: {
+              playlistId: playlist.id,
+            },
+          });
+
+          const firstVideoInPlaylist = await ctx.db.playlistHasVideo.findFirst({
+            where: {
+              playlistId: playlist.id,
+            },
+            include: {
+              video: {
+                select: {
+                  thumbnailUrl: true,
+                },
+              },
+            },
+          });
+
+          return {
+            ...playlist,
+            videoCount,
+            playlistThumbnail: firstVideoInPlaylist?.video?.thumbnailUrl,
+          };
+        }),
+      );
+
+      return playlists;
+    }),
   getSavePlaylistData: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
