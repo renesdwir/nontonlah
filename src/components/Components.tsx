@@ -13,4 +13,8 @@ export { default as Description } from "./Description";
 export { default as CommentSection } from "./CommentSection";
 export { default as ProfileHeader } from "./ProfileHeader";
 export { Thumbnail } from "./Thumbnail";
-export { MultiColumnPlaylist, SinglePlaylist } from "./PlaylistComponent";
+export {
+  MultiColumnPlaylist,
+  SinglePlaylist,
+  PlaylistPage,
+} from "./PlaylistComponent";
