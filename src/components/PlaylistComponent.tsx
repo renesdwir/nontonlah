@@ -1,6 +1,117 @@
 import Link from "next/link";
-import { Thumbnail } from "./Components";
+import {
+  Description,
+  SmallSingleColumnVideo,
+  Thumbnail,
+  UserImage,
+} from "./Components";
 import moment from "moment";
+import Head from "next/head";
+
+interface PlaylistPageProps {
+  playlist: {
+    id: string;
+    title: string;
+    description: string;
+    videoCount: number;
+    playlistThumbnail: string;
+    createdAt: Date;
+  };
+  videos: {
+    id: string;
+    title: string;
+    thumbnailUrl: string;
+    createdAt: Date;
+    views: number;
+  }[];
+  authors: {
+    id: string;
+    name: string;
+    image: string;
+  }[];
+  user: {
+    id: string;
+    image: string;
+    name: string;
+    followers: number;
+  };
+}
+
+export const PlaylistPage: React.FC<PlaylistPageProps> = ({
+  playlist,
+  videos,
+  authors,
+  user,
+}) => {
+  if (!playlist || !videos || !authors || !user) {
+    return <></>;
+  }
+  return (
+    <>
+      <Head>
+        <title>{playlist?.title ? playlist?.title + " - VidChill" : ""}</title>
+        <meta name="description" content={playlist?.description || ""} />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <main className="mx-auto gap-4 lg:flex">
+        <div className="lg:w-1/2 lg:px-0 lg:pl-6">
+          <SinglePlaylist
+            playlist={{
+              id: playlist?.id || "",
+              title: playlist?.title || "",
+              videoCount: playlist?.videoCount || 0,
+              playlistThumbnail: playlist?.playlistThumbnail || "",
+              createdAt: playlist?.createdAt || new Date(),
+            }}
+          />
+          <Description
+            text={playlist.description || ""}
+            length={250}
+            border={false}
+          />
+          <div className="flex flex-row  place-content-between gap-x-4 ">
+            <Link href={`/${user.id}/ProfileVideos`} key={user.id}>
+              <div className="mt-4 flex flex-row gap-2 ">
+                <UserImage image={user.image || ""} />
+                <div className="flex flex-col ">
+                  <p className="w-max text-sm font-semibold leading-6 text-gray-900">
+                    {user.name || ""}
+                  </p>
+                  <p className=" text-sm text-gray-600">
+                    {user.followers}
+                    <span> Followers</span>
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+        <div className="gap-4 lg:w-1/2 lg:px-0 lg:pr-6 ">
+          <SmallSingleColumnVideo
+            videos={videos
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime(),
+              )
+              .map((video) => ({
+                id: video?.id || "",
+                title: video?.title || "",
+                thumbnail: video?.thumbnailUrl || "",
+                createdAt: video?.createdAt || new Date(),
+                views: video?.views || 0,
+              }))}
+            users={authors.map((author) => ({
+              id: author?.id || "",
+              name: author?.name || "",
+              image: author?.image || "",
+            }))}
+          />
+        </div>
+      </main>
+    </>
+  );
+};
 
 export function MultiColumnPlaylist({
   playlists,
