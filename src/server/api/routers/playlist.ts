@@ -71,6 +71,95 @@ export const playlistRouter = createTRPCRouter({
         user: userWithFollowers,
       };
     }),
+  getPlaylistByTitle: publicProcedure
+    .input(
+      z.object({
+        title: z.string(),
+        userId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let rawPlaylist = await ctx.db.playlist.findFirst({
+        where: {
+          title: input.title,
+          userId: input.userId,
+        },
+        include: {
+          user: true,
+          PlaylistHasVideo: {
+            include: {
+              video: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (rawPlaylist === null || rawPlaylist === undefined) {
+        rawPlaylist = await ctx.db.playlist.create({
+          data: {
+            userId: input.userId,
+            title: input.title,
+            description: input.title,
+          },
+          include: {
+            user: true,
+            PlaylistHasVideo: {
+              include: {
+                video: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+      const followers = await ctx.db.followEngagement.count({
+        where: {
+          followingId: rawPlaylist.userId,
+        },
+      });
+      const userWithFollowers = { ...rawPlaylist.user, followers };
+      const videosWithUser = rawPlaylist.PlaylistHasVideo.map(({ video }) => ({
+        ...video,
+        author: video?.user,
+      }));
+
+      const videos = videosWithUser.map(({ author, ...video }) => video);
+      const users = videosWithUser.map(({ user }) => user);
+
+      const videosWithCounts = await Promise.all(
+        videos.map(async (video) => {
+          const views = await ctx.db.videoEngagement.count({
+            where: {
+              videoId: video.id,
+              engagementType: EngagementType.VIEW,
+            },
+          });
+          return {
+            ...video,
+            views,
+          };
+        }),
+      );
+
+      const {
+        user,
+        PlaylistHasVideo: rawVideos,
+        ...playlistInfo
+      } = rawPlaylist;
+
+      return {
+        playlist: playlistInfo,
+        videos: videosWithCounts,
+        authors: users,
+        user: userWithFollowers,
+      };
+    }),
   getPlaylistsByUserId: publicProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
