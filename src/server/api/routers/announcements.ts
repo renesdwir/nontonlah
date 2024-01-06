@@ -125,4 +125,52 @@ export const announcementRouter = createTRPCRouter({
         return like;
       }
     }),
+  addDislikeAnnouncement: protectedProcedure
+    .input(z.object({ id: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const existingDislike = await ctx.db.announcementEngagement.findMany({
+        where: {
+          announcementId: input.id,
+          userId: input.userId,
+          engagementType: EngagementType.DISLIKE,
+        },
+      });
+      const existingLike = await ctx.db.announcementEngagement.findMany({
+        where: {
+          announcementId: input.id,
+          userId: input.userId,
+          engagementType: EngagementType.LIKE,
+        },
+      });
+      if (existingLike.length > 0) {
+        await ctx.db.announcementEngagement.deleteMany({
+          where: {
+            announcementId: input.id,
+            userId: input.userId,
+            engagementType: EngagementType.LIKE,
+          },
+        });
+      }
+
+      if (existingDislike.length > 0) {
+        const deleteDislike = await ctx.db.announcementEngagement.deleteMany({
+          where: {
+            announcementId: input.id,
+            userId: input.userId,
+            engagementType: EngagementType.DISLIKE,
+          },
+        });
+        return deleteDislike;
+      } else {
+        const Dislike = await ctx.db.announcementEngagement.create({
+          data: {
+            announcementId: input.id,
+            userId: input.userId,
+            engagementType: EngagementType.DISLIKE,
+          },
+        });
+
+        return Dislike;
+      }
+    }),
 });
