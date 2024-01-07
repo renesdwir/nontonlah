@@ -89,7 +89,17 @@ const ProfileVideos: NextPage = () => {
                           <p className="my-2 text-sm text-gray-600">
                             {announcement.message}
                           </p>
-                          <AnnouncementButton />
+                          <AnnouncementButton
+                            EngagementData={{
+                              id: announcement.id,
+                              likes: announcement.likes,
+                              dislikes: announcement.dislikes,
+                            }}
+                            viewer={{
+                              hasDisliked: announcement.viewer.hasDisliked,
+                              hasLiked: announcement.viewer.hasLiked,
+                            }}
+                          />
                         </div>
                       </div>
                     </li>
@@ -102,3 +112,5 @@ const ProfileVideos: NextPage = () => {
     </>
   );
 };
+
+export default ProfileVideos;
