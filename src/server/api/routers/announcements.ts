@@ -173,4 +173,19 @@ export const announcementRouter = createTRPCRouter({
         return Dislike;
       }
     }),
+  addAnnouncement: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        message: z.string().max(200).min(5),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.announcement.create({
+        data: {
+          userId: input.userId,
+          message: input.message,
+        },
+      });
+    }),
 });
