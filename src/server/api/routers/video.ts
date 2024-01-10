@@ -1,7 +1,28 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { EngagementType } from "@prisma/client";
-
+import { EngagementType, PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+type Context = {
+  db: PrismaClient;
+};
+const checkVideoOwnership = async (
+  ctx: Context,
+  id: string,
+  userId: string,
+) => {
+  const video = await ctx.db.video.findUnique({
+    where: {
+      id: id,
+    },
+  });
+  if (!video || video.userId !== userId) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Video not found",
+    });
+  }
+  return video;
+};
 export const videoRouter = createTRPCRouter({
   getVideoById: publicProcedure
     .input(z.object({ id: z.string(), viewerId: z.string().optional() }))
@@ -224,5 +245,21 @@ export const videoRouter = createTRPCRouter({
         });
         return playlistHasVideo;
       }
+    }),
+  publishVideo: protectedProcedure
+    .input(z.object({ id: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const video = await checkVideoOwnership(ctx, input.id, input.userId);
+      const publishVideo = await ctx.db.video.update({
+        where: {
+          id: video.id,
+        },
+
+        data: {
+          publish: !video.publish,
+        },
+      });
+
+      return publishVideo;
     }),
 });
