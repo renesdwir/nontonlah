@@ -22,6 +22,8 @@ export { default as ThumbsDown } from "./ThumbsDown";
 export { default as FolderPlus } from "./FolderPlus";
 export { default as Edit } from "./Edit";
 export { default as Plus } from "./Plus";
+export { default as RedTrash } from "./RedTrash";
+export { default as Trash } from "./Trash";
 export {
   GreenPlay,
   GreenHorn,
