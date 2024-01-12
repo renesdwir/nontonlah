@@ -114,7 +114,6 @@ const VideoPage: NextPage = () => {
                     width={"100%"}
                     height={"50%"}
                     url={video.videoUrl || ""}
-                    onPlay={() => console.log("playy")}
                   />
                 </div>
                 <div className="flex space-x-3 rounded-2xl border border-gray-200 p-4 shadow-sm">
