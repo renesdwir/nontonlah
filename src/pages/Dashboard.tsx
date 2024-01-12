@@ -1,8 +1,17 @@
 import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import { UploadButton } from "~/components/Buttons/Buttons";
-import { ErrorMessage, Layout, LoadingMessage } from "~/components/Components";
+import {
+  DeleteButton,
+  PublishedButton,
+  UploadButton,
+} from "~/components/Buttons/Buttons";
+import {
+  ErrorMessage,
+  Layout,
+  LoadingMessage,
+  Thumbnail,
+} from "~/components/Components";
 import { GreenEye, GreenHeart, GreenUserCheck } from "~/components/Icons/Icons";
 import { api } from "~/utils/api";
 interface StatsItem {
@@ -89,6 +98,105 @@ const Dashboard: NextPage = () => {
                     </div>
                   ))}
                 </dl>
+              </div>
+              <div className="rounded-2xl border border-gray-200 p-6 px-4 shadow-sm sm:px-6 lg:px-8">
+                <div className="mt-8 flow-root">
+                  <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                      <table className="min-w-full divide-y divide-gray-300">
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                            >
+                              Status
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                            ></th>
+                            <th
+                              scope="col"
+                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                            >
+                              Uploaded
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                            >
+                              Rating
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                            >
+                              Data Uploaded
+                            </th>
+                            <th
+                              scope="col"
+                              className="relative py-3.5 pl-3 pr-4 sm:pr-0"
+                            >
+                              <span className="sr-only">Edit</span>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                          {data?.videos.map((video) => (
+                            <tr key={video.id}>
+                              <PublishedButton video={video} />
+                              <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
+                                <div className="flex">
+                                  <div className="h-16 w-16 flex-shrink-0">
+                                    <Thumbnail
+                                      thumbnailUrl={
+                                        video.thumbnailUrl || "/background.jpg"
+                                      }
+                                    />
+                                  </div>
+                                  <div className="ml-4 font-medium text-gray-900">
+                                    {video.title}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                                <span className="inline-flex items-center rounded-full bg-success-100 px-2 py-1 text-xs font-medium text-success-700">
+                                  {video.likes} Likes
+                                </span>
+                                <span className="inline-flex items-center rounded-full  bg-error-100 px-2 py-1 text-xs font-medium text-error-700">
+                                  {video.dislikes} Dislikes
+                                </span>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-600">
+                                {video.createdAt.toLocaleDateString()}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-600">
+                                <div className="flex flex-row gap-2">
+                                  <DeleteButton
+                                    videoId={video.id}
+                                    refetch={refetch}
+                                  />
+                                  {/* 
+
+                                  <EditButton
+                                    video={{
+                                      id: video?.id || "",
+                                      title: video?.title || "",
+                                      description: video?.description || "",
+                                      thumbnailUrl: video?.thumbnailUrl || "",
+                                    }}
+                                    refetch={refetch}
+                                  /> */}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
