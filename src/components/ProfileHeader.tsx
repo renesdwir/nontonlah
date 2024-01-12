@@ -45,7 +45,6 @@ export default function ProfileHeader() {
       tab.current = tab.path === router.pathname;
     });
   }, [router.pathname]);
-  console.log(sessionData);
   const { data, isLoading, error } = api.user.getChannelById.useQuery({
     id: userId as string,
     viewerId: sessionData?.user?.id as string,
